@@ -1,0 +1,19 @@
+/* Small global rules. Most styling comes from Tailwind classes in the templates. */
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overscroll-behavior: none;
+}
+
+/* Hero section sits right under the fixed header, so no gap above it */
+main > :first-child {
+    margin-top: 0 !important;
+}
+
+main > :last-child {
+    margin-bottom: 0 !important;
+}
