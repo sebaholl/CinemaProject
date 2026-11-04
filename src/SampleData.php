@@ -7,6 +7,14 @@ class SampleData
 {
     private const CAPACITY = 100;
 
+    // Ticket prices (kr). Later these live in the database.
+    public const PRICE_STANDARD = 150;
+    public const PRICE_LUXURY   = 185;
+    public const BOOKING_FEE    = 5;
+
+    // Fallback backdrop for the booking page hero (featured movie has no poster).
+    private const HERO_BACKDROP = 'https://images.alphacoders.com/141/thumb-1920-1412625.jpg';
+
     // The big movie in the hero section
     public static function featuredMovie(): array
     {
@@ -130,6 +138,92 @@ class SampleData
                 'image' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHB5xHfW-j9VjVV_mQ6vJc6abxKrNpMgF_w9sT6v_bm94O6Rd9E9UtkCxaf6yvxNlwQS3344WYErCa_bilUYhrlrOKn1-55NN4JPtMyR_Vc7aa6WogJeH2c1VWnLYGkP3louhslhnN5wrguL3FhOWj0CCz0MoI3GPPq7agJ7071nMs1T-gZ9f97VsFy290V0UAOxiMgrg7pdXRxrpm3kqMhKb1fasvJkuexZ3KGb_E2kTZyhwSWo3Nqg',
                 'link_text' => 'Learn more',
             ],
+        ];
+    }
+
+    // Find one showing by its id. The booking page uses this.
+    // It reuses the same arrays the front page already shows, so the seating
+    // plan always matches the showtime the user clicked. Returns null if unknown.
+    // Later this becomes: SELECT ... FROM showings WHERE id = ? (one Showing object).
+    public static function showingById(int $id): ?array
+    {
+        // 1) The "today" chips under the hero belong to the featured movie.
+        $featured = self::featuredMovie();
+        foreach (self::todayShowings() as $slot) {
+            if ((int) $slot['id'] === $id) {
+                return self::showing($slot, $featured['title'], $featured['duration'], self::HERO_BACKDROP, 'Today');
+            }
+        }
+
+        // 2) The weekly programme matrix (ids from 100 up).
+        $days = self::weekDays();
+        foreach (self::weekSchedule() as $movie) {
+            foreach ($movie['days'] as $dayIndex => $slots) {
+                foreach ($slots as $slot) {
+                    if ((int) $slot['id'] === $id) {
+                        $label = $days[$dayIndex]['label'] . ($dayIndex === 0 ? ' (Today)' : '');
+                        return self::showing($slot, $movie['title'], $movie['duration'], $movie['poster'], $label);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // The seats for one auditorium, as 8 rows.
+    // Which seats are sold is derived from the showing id, so the same showing
+    // always shows the same taken seats (stable, like real data would be).
+    // Later this becomes the "seat availability" query / view for that showing.
+    public static function seatMap(int $showingId): array
+    {
+        $seatsPerRow = 18;
+        $rows = [];
+
+        for ($r = 1; $r <= 8; $r++) {
+            $seats = [];
+            for ($n = 1; $n <= $seatsPerRow; $n++) {
+                // Seat category.
+                $type = 'standard';
+                if ($r >= 7 && $n >= 6 && $n <= 13) {
+                    $type = 'luxury';                    // comfy middle seats, back two rows
+                }
+                if ($r === 7 && ($n === 1 || $n === 2)) {
+                    $type = 'accessible';                // two wheelchair spaces, aisle side
+                }
+
+                // Stable "sold" pattern: a simple hash of the showing + seat.
+                $hash   = ($showingId * 73 + $r * 17 + $n * 29) % 100;
+                $state  = $hash < 20 ? 'sold' : 'available';   // ~20% already sold
+
+                $seats[] = [
+                    'id'    => 'R' . $r . 'S' . $n,
+                    'row'   => $r,
+                    'num'   => $n,
+                    'type'  => $type,
+                    'state' => $state,
+                    'price' => $type === 'luxury' ? self::PRICE_LUXURY : self::PRICE_STANDARD,
+                ];
+            }
+            $rows[] = ['row' => $r, 'seats' => $seats];
+        }
+
+        return $rows;
+    }
+
+    // Merge a showtime slot with its movie into one flat "showing" row.
+    private static function showing(array $slot, string $title, int $duration, string $backdrop, string $dateLabel): array
+    {
+        return [
+            'id'         => (int) $slot['id'],
+            'title'      => $title,
+            'duration'   => $duration,
+            'screen'     => (int) $slot['screen'],
+            'time'       => $slot['time'],
+            'format'     => $slot['format'],
+            'date_label' => $dateLabel,
+            'backdrop'   => $backdrop,
+            'price'      => self::PRICE_STANDARD,
         ];
     }
 
