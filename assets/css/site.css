@@ -1,0 +1,56 @@
+/* Small global rules. Most styling comes from Tailwind classes in the templates. */
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overscroll-behavior: none;
+}
+
+/* Hero section sits right under the fixed header, so no gap above it */
+main > :first-child {
+    margin-top: 0 !important;
+}
+
+main > :last-child {
+    margin-bottom: 0 !important;
+}
+
+/* --- Booking page: one seat in the seating plan --- */
+/* Colours reuse the site palette: coral = selected, gold = luxury, green = accessible. */
+.seat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: #9c8f8f;                 /* standard, available */
+    cursor: pointer;
+    transition: color .15s ease, background .15s ease, transform .1s ease;
+}
+.seat .material-symbols-outlined { font-size: 22px; line-height: 1; }
+.seat--luxury     { color: #ffb94c; }   /* gold */
+.seat--accessible { color: #51df9a; }   /* green */
+.seat:hover:not(.seat--sold):not(.seat--selected) {
+    color: #e2e2e8;
+    background: rgba(255, 255, 255, .06);
+    transform: translateY(-1px);
+}
+.seat:focus-visible { outline: 2px solid #ff5167; outline-offset: 1px; }
+.seat--selected,
+.seat--selected:hover {
+    color: #ff5167;                 /* coral = your seats */
+    background: rgba(255, 81, 103, .14);
+}
+.seat--sold {
+    color: #3a2f30;                 /* dim = taken */
+    cursor: not-allowed;
+}
+
+/* Spacer that stands in for a seat position (keeps rows aligned where there is an aisle) */
+.seat-gap { width: 1.75rem; height: 1.75rem; display: inline-block; }

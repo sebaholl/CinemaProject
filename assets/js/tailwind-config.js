@@ -1,0 +1,98 @@
+// Tailwind theme (colors, fonts, spacing). Must load after the Tailwind CDN script.
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            "colors": {
+                "on-secondary-fixed-variant": "#624000",
+                "outline-variant": "#5a4041",
+                "secondary-fixed-dim": "#ffb94c",
+                "on-surface-variant": "#e3bebe",
+                "error": "#ffb4ab",
+                "secondary-container": "#c3840a",
+                "background": "#111318",
+                "tertiary-fixed-dim": "#51df9a",
+                "outline": "#aa8989",
+                "surface-container-highest": "#333539",
+                "surface-dim": "#111318",
+                "on-tertiary-fixed-variant": "#005232",
+                "primary-fixed": "#ffdada",
+                "surface-container-lowest": "#0c0e12",
+                "primary-container": "#ff5167",
+                "secondary": "#ffb94c",
+                "surface-container-high": "#282a2e",
+                "on-primary-fixed-variant": "#920027",
+                "tertiary-container": "#00a56a",
+                "on-surface": "#e2e2e8",
+                "on-secondary-fixed": "#291800",
+                "on-primary": "#680019",
+                "on-secondary-container": "#3c2500",
+                "on-primary-container": "#5b0015",
+                "on-tertiary": "#003921",
+                "on-error": "#690005",
+                "on-error-container": "#ffdad6",
+                "on-primary-fixed": "#40000c",
+                "surface": "#111318",
+                "surface-bright": "#37393e",
+                "secondary-fixed": "#ffddb2",
+                "primary": "#ffb3b5",
+                "tertiary-fixed": "#71fcb5",
+                "surface-container": "#1e2024",
+                "on-tertiary-fixed": "#002111",
+                "tertiary": "#51df9a",
+                "on-secondary": "#442b00",
+                "inverse-primary": "#ba1539",
+                "on-background": "#e2e2e8",
+                "surface-container-low": "#1a1c20",
+                "error-container": "#93000a",
+                "surface-variant": "#333539",
+                "inverse-on-surface": "#2f3035",
+                "inverse-surface": "#e2e2e8",
+                "on-tertiary-container": "#00311c",
+                "surface-tint": "#ffb3b5",
+                "primary-fixed-dim": "#ffb3b5"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "space-xl": "2.5rem",
+                "margin-mobile": "1rem",
+                "space-lg": "1.5rem",
+                "space-xs": "0.25rem",
+                "space-sm": "0.5rem",
+                "gutter-sm": "1rem",
+                "space-md": "1rem",
+                "gutter": "1.5rem",
+                "margin": "2rem"
+            },
+            "fontFamily": {
+                "display-xl": ["Inter"],
+                "body-bold": ["Inter"],
+                "headline-lg-mobile": ["Inter"],
+                "body-regular": ["Inter"],
+                "caption-label": ["Inter"],
+                "subheading": ["Inter"],
+                "time-slot-headline": ["Inter"],
+                "headline-lg": ["Inter"],
+                "eyebrow-caps": ["Inter"],
+                "display-xl-mobile": ["Inter"]
+            },
+            "fontSize": {
+                "display-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }],
+                "body-bold": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                "body-regular": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                "caption-label": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+                "subheading": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+                "time-slot-headline": ["18px", { "lineHeight": "22px", "fontWeight": "700" }],
+                "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                "eyebrow-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "700" }],
+                "display-xl-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }]
+            }
+        }
+    }
+};
