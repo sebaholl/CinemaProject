@@ -71,7 +71,7 @@ $seatLegend = [
                 <div class="mt-space-md flex items-center justify-between gap-space-md border-t border-surface-container-highest/30 pt-space-md">
                     <div class="flex flex-col">
                         <span class="font-body-bold text-body-bold text-on-surface">Standard</span>
-                        <span class="font-caption-label text-caption-label text-on-surface-variant"><?= (int) SampleData::PRICE_STANDARD ?> kr incl. <?= (int) SampleData::BOOKING_FEE ?> kr booking fee</span>
+                        <span class="font-caption-label text-caption-label text-on-surface-variant"><?= (int) Pricing::STANDARD ?> kr incl. <?= (int) Pricing::BOOKING_FEE ?> kr booking fee</span>
                     </div>
                     <div class="flex items-center gap-space-sm">
                         <button type="button" data-step="dec" aria-label="Fewer tickets"
@@ -85,11 +85,13 @@ $seatLegend = [
                         </button>
                     </div>
                 </div>
-                <p class="mt-space-sm font-caption-label text-caption-label text-on-surface-variant">Up to 5 seats per booking. Luxury seats cost <?= (int) SampleData::PRICE_LUXURY ?> kr.</p>
+                <p class="mt-space-sm font-caption-label text-caption-label text-on-surface-variant">Up to 5 seats per booking. Luxury seats cost <?= (int) Pricing::LUXURY ?> kr.</p>
             </div>
 
             <!-- Order summary -->
             <form id="booking-form" method="post" action="<?= e(url('checkout.php')) ?>" class="p-space-lg rounded-xl bg-surface-container-low border border-surface-container-highest/30 flex flex-col gap-space-md">
+                <?= csrf_field() ?>
+                <input type="hidden" name="step" value="select">
                 <input type="hidden" name="showing_id" value="<?= (int) $showing['id'] ?>">
                 <input type="hidden" name="seats" id="seats-field" value="">
 

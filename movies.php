@@ -1,10 +1,12 @@
 <?php
-// Movie list page (stub). Will be filled from the database later.
+// Movie list page. Reads every movie from the database.
 require_once __DIR__ . '/includes/bootstrap.php';
 
 $pageTitle   = 'Movies';
 $currentPage = 'movies';
-$movies      = SampleData::nowShowing();
+
+$pdo    = Database::getInstance()->getConnection();
+$movies = array_map('vm_movie_card', (new MovieRepository($pdo))->findAll());
 
 require __DIR__ . '/templates/layout/header.php';
 ?>
