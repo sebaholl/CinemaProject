@@ -1,15 +1,16 @@
-// Booking page: pick seats, keep the summary in sync.
+// Booking page: pick a ticket count, then click one seat to grab that many
+// adjacent seats in the same row at once (with a hover preview of what you'll get).
 // NOTE: this is only the front-end helper. The real seat rules (max 5 seats,
 // no awkward single gaps, seat still free) must be checked again in PHP when
 // the form is submitted, because JavaScript can be bypassed.
 (function () {
     var MAX_SEATS = 5;
 
-    var countEl    = document.getElementById('ticket-count');
-    var listEl     = document.getElementById('selected-list');
-    var totalEl    = document.getElementById('selected-total');
-    var hintEl     = document.getElementById('selected-hint');
-    var fieldEl    = document.getElementById('seats-field');
+    var countEl     = document.getElementById('ticket-count');
+    var listEl      = document.getElementById('selected-list');
+    var totalEl     = document.getElementById('selected-total');
+    var hintEl      = document.getElementById('selected-hint');
+    var fieldEl     = document.getElementById('seats-field');
     var continueBtn = document.getElementById('continue-btn');
     var decBtn = document.querySelector('[data-step="dec"]');
     var incBtn = document.querySelector('[data-step="inc"]');
@@ -19,29 +20,69 @@
 
     var target   = parseInt(countEl.textContent, 10) || 1;  // how many seats to pick
     var selected = [];                                       // chosen seat elements, in order
+    var anchor   = null;                                     // the seat the block starts from
+
+    // Index the available seats by row + number so we can find neighbours quickly.
+    // Only available seats are buttons, so a missing number here means "sold or no seat".
+    var byRow = {};
+    seats.forEach(function (seat) {
+        var row = seat.dataset.row;
+        (byRow[row] = byRow[row] || {})[parseInt(seat.dataset.num, 10)] = seat;
+    });
+    function seatAt(row, num) {
+        return (byRow[row] && byRow[row][num]) || null;
+    }
+
+    // Build a run of up to `n` seats that are side by side in the same row,
+    // starting from the clicked seat and growing right first, then left.
+    // A sold seat or the end of the row stops the run, so the block is always gap-free.
+    function contiguousBlock(row, startNum, n) {
+        var first = seatAt(row, startNum);
+        if (!first) return [];
+        var block = [first];
+        var right = startNum + 1;
+        while (block.length < n && seatAt(row, right)) { block.push(seatAt(row, right)); right++; }
+        var left = startNum - 1;
+        while (block.length < n && seatAt(row, left)) { block.unshift(seatAt(row, left)); left--; }
+        return block;
+    }
 
     function typeLabel(type) {
         return type.charAt(0).toUpperCase() + type.slice(1);
     }
 
-    function deselect(seat) {
-        seat.classList.remove('seat--selected');
-        seat.setAttribute('aria-pressed', 'false');
-        selected = selected.filter(function (s) { return s !== seat; });
+    function clearSelection() {
+        selected.forEach(function (seat) {
+            seat.classList.remove('seat--selected');
+            seat.setAttribute('aria-pressed', 'false');
+        });
+        selected = [];
     }
 
-    function select(seat) {
-        seat.classList.add('seat--selected');
-        seat.setAttribute('aria-pressed', 'true');
-        selected.push(seat);
+    function selectBlock(block) {
+        clearSelection();
+        block.forEach(function (seat) {
+            seat.classList.add('seat--selected');
+            seat.setAttribute('aria-pressed', 'true');
+            selected.push(seat);
+        });
+        render();
+    }
+
+    function clearPreview() {
+        document.querySelectorAll('.seat--preview').forEach(function (seat) {
+            seat.classList.remove('seat--preview');
+        });
+    }
+
+    // Show which seats a click would grab, so the choice is visible before committing.
+    function showPreview(seat) {
+        clearPreview();
+        contiguousBlock(seat.dataset.row, parseInt(seat.dataset.num, 10), Math.min(target, MAX_SEATS))
+            .forEach(function (s) { s.classList.add('seat--preview'); });
     }
 
     function render() {
-        // Keep the number of chosen seats within the ticket count.
-        while (selected.length > target) {
-            deselect(selected[selected.length - 1]);
-        }
-
         // Summary list + total.
         var total = 0;
         if (selected.length === 0) {
@@ -65,15 +106,19 @@
         totalEl.textContent = total + ' kr';
 
         // Hint + continue button.
-        var remaining = target - selected.length;
-        if (remaining > 0) {
-            hintEl.textContent = 'Select ' + remaining + ' more seat' + (remaining === 1 ? '' : 's') + '.';
+        if (selected.length === 0) {
+            hintEl.textContent = 'Click a seat to grab ' + target + ' seat' + (target === 1 ? '' : 's') + ' together.';
             hintEl.className = 'font-caption-label text-caption-label text-secondary';
+        } else if (selected.length < target) {
+            // The clicked spot did not have enough seats side by side for the whole group.
+            hintEl.textContent = 'Only ' + selected.length + ' seat' + (selected.length === 1 ? '' : 's') +
+                ' fit together there — pick another spot for ' + target + '.';
+            hintEl.className = 'font-caption-label text-caption-label text-primary';
         } else {
             hintEl.textContent = 'Ready — continue to checkout.';
             hintEl.className = 'font-caption-label text-caption-label text-tertiary';
         }
-        continueBtn.disabled = selected.length === 0 || selected.length !== target;
+        continueBtn.disabled = selected.length !== target;
 
         // Store chosen seat ids for the PHP side.
         fieldEl.value = selected.map(function (s) { return s.dataset.seatId; }).join(',');
@@ -84,29 +129,37 @@
         incBtn.disabled = target >= MAX_SEATS;
     }
 
+    // Re-pick the block from the same starting seat whenever the ticket count changes,
+    // so bumping the count up or down grows/shrinks the group automatically.
+    function setTarget(next) {
+        target = Math.max(1, Math.min(MAX_SEATS, next));
+        if (anchor) {
+            selectBlock(contiguousBlock(anchor.dataset.row, parseInt(anchor.dataset.num, 10), target));
+        } else {
+            render();
+        }
+    }
+
     seats.forEach(function (seat) {
         seat.addEventListener('click', function () {
+            clearPreview();
             if (seat.classList.contains('seat--selected')) {
-                deselect(seat);
-            } else if (selected.length < target && selected.length < MAX_SEATS) {
-                select(seat);
-            } else {
-                // At the limit: nudge the hint so the user knows why nothing happened.
-                hintEl.textContent = 'You have selected ' + target + ' seat' + (target === 1 ? '' : 's') +
-                    '. Remove one or add a ticket first.';
-                hintEl.className = 'font-caption-label text-caption-label text-primary';
+                // Clicking inside the current group clears it.
+                clearSelection();
+                anchor = null;
+                render();
                 return;
             }
-            render();
+            anchor = seat;
+            selectBlock(contiguousBlock(seat.dataset.row, parseInt(seat.dataset.num, 10), Math.min(target, MAX_SEATS)));
         });
+
+        seat.addEventListener('mouseenter', function () { showPreview(seat); });
+        seat.addEventListener('mouseleave', clearPreview);
     });
 
-    decBtn.addEventListener('click', function () {
-        if (target > 1) { target--; render(); }
-    });
-    incBtn.addEventListener('click', function () {
-        if (target < MAX_SEATS) { target++; render(); }
-    });
+    decBtn.addEventListener('click', function () { setTarget(target - 1); });
+    incBtn.addEventListener('click', function () { setTarget(target + 1); });
 
     render();
 })();
