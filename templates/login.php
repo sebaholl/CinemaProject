@@ -43,4 +43,11 @@
             Log in
         </button>
     </form>
+
+    <p class="mt-space-md">
+    New customer?
+    <a href="<?= e(url('register.php')) ?>" class="text-primary hover:underline">
+        Create an account
+    </a>
+</p>
 </section>
