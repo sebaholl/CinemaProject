@@ -95,15 +95,20 @@ function csrf_check(): bool
 }
 
 // --- Current customer ------------------------------------------------------
-// The logged-in customer's id, or null for a guest. Login/registration (build
-// step 4) will set $_SESSION['customer_id']; until then this returns null.
+// The logged-in customer's id, or null for a guest/admin. Auth stores the
+// signed-in account under $_SESSION['auth'] (role + id); for a customer that
+// id IS the customer_id. We only return it when the role is 'customer', so an
+// admin session counts as null here (admins don't book seats).
 // This is the single switch for the "max 5 per customer" rule: while it is null
-// the checkout counts 0 existing seats (so the shared guest id can't block
-// everyone), and it becomes a true per-customer cap the moment login populates
-// the session — with no change to the validation code.
+// the checkout counts 0 existing seats, and it becomes a true per-customer cap
+// the moment a customer logs in — with no change to the validation code.
 function current_customer_id(): ?int
 {
-    $id = $_SESSION['customer_id'] ?? null;
+    $auth = $_SESSION['auth'] ?? null;
+    if (!is_array($auth) || ($auth['role'] ?? null) !== 'customer') {
+        return null;
+    }
+    $id = $auth['id'] ?? null;
     return is_int($id) && $id > 0 ? $id : null;
 }
 
