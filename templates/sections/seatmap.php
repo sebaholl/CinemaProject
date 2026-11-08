@@ -15,11 +15,12 @@ $backUrl = url('booking.php?showing_id=' . (int) $showing['id']);               
 $view3dUrl = url('booking.php?showing_id=' . (int) $showing['id'] . '&view=3d');  // 3D view
 
 // Legend for the seating plan (matches the .seat CSS colours).
+// The type (standard | luxury | accessible) picks the glyph via seat_icon().
 $seatLegend = [
-    ['seat--standard',   'event_seat', 'Available'],
-    ['seat--selected',   'event_seat', 'Your seats'],
-    ['seat--sold',       'event_seat', 'Sold'],
-    ['seat--luxury',     'event_seat', 'Luxury'],
+    ['seat--standard',   'standard',   'Available'],
+    ['seat--selected',   'standard',   'Your seats'],
+    ['seat--sold',       'standard',   'Sold'],
+    ['seat--luxury',     'luxury',     'Luxury'],
     ['seat--accessible', 'accessible', 'Accessible'],
 ];
 ?>
@@ -148,7 +149,7 @@ $seatLegend = [
 
                     <!-- Rows -->
                     <div class="w-full overflow-x-auto">
-                        <div class="mx-auto flex flex-col gap-space-xs min-w-[640px] w-fit">
+                        <div class="mx-auto flex flex-col items-center gap-space-xs min-w-[640px] w-fit">
                             <?php foreach ($seatRows as $row): ?>
                                 <div class="flex items-center gap-space-sm <?= $row['row'] === 7 ? 'mt-space-lg' : '' ?>">
                                     <span class="w-5 text-right font-caption-label text-[11px] text-on-surface-variant/70"><?= (int) $row['row'] ?></span>
@@ -166,9 +167,9 @@ $seatLegend = [
 
                 <!-- Legend -->
                 <div class="mt-space-xl pt-space-md border-t border-surface-container-highest/30 flex flex-wrap items-center gap-x-space-lg gap-y-space-sm">
-                    <?php foreach ($seatLegend as [$cls, $icon, $label]): ?>
+                    <?php foreach ($seatLegend as [$cls, $seatType, $label]): ?>
                         <span class="flex items-center gap-space-xs font-caption-label text-caption-label text-on-surface-variant">
-                            <span class="seat <?= e($cls) ?>" style="width:1.25rem;height:1.25rem;pointer-events:none;"><span class="material-symbols-outlined" style="font-size:16px;"><?= e($icon) ?></span></span>
+                            <span class="seat seat--legend <?= e($cls) ?>" style="pointer-events:none;"><?= seat_icon($seatType) ?></span>
                             <?= e($label) ?>
                         </span>
                     <?php endforeach; ?>

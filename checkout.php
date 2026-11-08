@@ -54,8 +54,15 @@ if ($step === 'select') {
         exit;
     }
 
+    // Max-5 rule counts the customer's existing seats for this showing + the new ones.
+    // Guests (no login yet) count 0, so they stay capped per booking; see current_customer_id().
+    $customerId = current_customer_id();
+    $existing   = $customerId !== null
+        ? $bookRepo->countConfirmedSeatsForCustomer($showingId, $customerId)
+        : 0;
+
     $allSeats = $seatRepo->findForScreening($showingId);
-    $errors   = SeatRules::validate($allSeats, $seatIds);
+    $errors   = SeatRules::validate($allSeats, $seatIds, $existing);
     if ($errors !== []) {
         render_checkout_error(implode(' ', $errors), $showingId);
         exit;
@@ -93,8 +100,13 @@ if ($screening === null) {
 }
 
 // Re-read availability and re-check the rules: a seat may have gone in the meantime.
+$customerId = current_customer_id();
+$existing   = $customerId !== null
+    ? $bookRepo->countConfirmedSeatsForCustomer($showingId, $customerId)
+    : 0;
+
 $allSeats = $seatRepo->findForScreening($showingId);
-$errors   = SeatRules::validate($allSeats, $seatIds);
+$errors   = SeatRules::validate($allSeats, $seatIds, $existing);
 if ($errors !== []) {
     render_card_form($screening, $allSeats, $seatIds, implode(' ', $errors));
     exit;
@@ -114,8 +126,9 @@ if (str_ends_with($cardRaw, '0000')) {
 }
 
 // Payment "succeeded" — create the booking (this is the real seat lock).
+// Attribute it to the logged-in customer, or the demo guest until login exists.
 try {
-    $booking = $bookRepo->create($showingId, GUEST_CUSTOMER_ID, $allSeats, $seatIds);
+    $booking = $bookRepo->create($showingId, $customerId ?? GUEST_CUSTOMER_ID, $allSeats, $seatIds);
 } catch (BookingException $e) {
     render_card_form($screening, $allSeats, $seatIds, $e->getMessage());
     exit;

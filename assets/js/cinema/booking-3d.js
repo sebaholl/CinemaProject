@@ -2,6 +2,12 @@
 // It loads real seat data from PHP, boots the (unchanged) CinemaScene, keeps the
 // booking panel in sync, and hands the chosen seats to checkout.php.
 //
+// Seat picking mirrors the 2D plan: set a ticket count, then tap ONE seat to grab
+// that many seats side by side in the same row at once, with a hover preview of the
+// block. All of that lives here (our wiring layer) by overriding two methods on the
+// CinemaScene instance, so the engine file itself stays exactly as copied from the
+// Cinema3D prototype repo.
+//
 // IMPORTANT: the seat rules here are only for friendly on-screen messages. The real
 // checks (max seats, no single gap, seat still free) run again in PHP at checkout,
 // because anything in the browser can be bypassed.
@@ -26,6 +32,14 @@ const elements = {
   seatsField: document.querySelector('#seats-field'),
 };
 
+// Seat colours, mirrored from CinemaScene's own palette so we can repaint seats for
+// the block selection/preview without reaching into the (unchanged) engine file.
+const SEAT_COLORS = {
+  available: 0x16295c,
+  selected: 0xf2bd48,
+  hover: 0xc6cedd,
+};
+
 const MIN_TICKETS = 1;
 let MAX_TICKETS = 5; // overwritten by the server's maxSeats
 
@@ -34,6 +48,31 @@ let selectedSeats = [];
 let allSeats = [];
 let cinema;
 let toastTimer;
+
+// Index seats by "ROW:NUMBER" so we can find a seat's neighbours quickly.
+let seatByRowNum = new Map();
+let anchorSeat = null;  // the seat a block starts from (so count changes can re-grow it)
+let previewSeats = [];  // seats currently painted as a hover preview
+
+function seatAt(row, number) {
+  const seat = seatByRowNum.get(row + ':' + number);
+  return seat && seat.status === 'available' ? seat : null;
+}
+
+// Build a run of up to `n` seats that sit side by side in the same row, starting
+// from the given seat and growing right first, then left. An occupied seat or the
+// end of the row stops the run, so the block is always gap-free. (Same idea as the
+// 2D plan in assets/js/booking.js.)
+function contiguousBlock(row, startNum, n) {
+  const first = seatAt(row, startNum);
+  if (!first) return [];
+  const block = [first];
+  let right = startNum + 1;
+  while (block.length < n && seatAt(row, right)) { block.push(seatAt(row, right)); right += 1; }
+  let left = startNum - 1;
+  while (block.length < n && seatAt(row, left)) { block.unshift(seatAt(row, left)); left -= 1; }
+  return block;
+}
 
 function showToast(message) {
   if (!elements.toast) return;
@@ -88,9 +127,13 @@ function renderBooking() {
 
   const remaining = ticketCount - count;
   if (elements.seatsHint) {
-    if (remaining > 0) {
+    if (count === 0) {
       elements.seatsHint.hidden = false;
-      elements.seatsHint.textContent = `Select ${remaining} more seat${remaining === 1 ? '' : 's'}.`;
+      elements.seatsHint.textContent = `Tap a seat to grab ${ticketCount} together.`;
+    } else if (remaining > 0) {
+      // The tapped spot did not have enough seats side by side for the whole group.
+      elements.seatsHint.hidden = false;
+      elements.seatsHint.textContent = `Only ${count} seat${count === 1 ? '' : 's'} fit together there — tap another spot for ${ticketCount}.`;
     } else {
       elements.seatsHint.hidden = true;
     }
@@ -98,14 +141,91 @@ function renderBooking() {
   if (elements.checkout) elements.checkout.disabled = count === 0 || remaining > 0;
 }
 
+// Paint the given block as the current selection, clearing any previous selection.
+function selectBlockInScene(block) {
+  if (!cinema) return;
+  clearPreview();
+  [...cinema.selectedSeats.values()].forEach((s) => cinema.setSeatColor(s, SEAT_COLORS.available));
+  cinema.selectedSeats.clear();
+  block.forEach((s) => {
+    cinema.selectedSeats.set(s.id, s);
+    cinema.setSeatColor(s, SEAT_COLORS.selected);
+  });
+  cinema.emitSelection(); // -> onSelectionChange -> renderBooking()
+}
+
+function clearSelectionInScene() {
+  if (!cinema) return;
+  [...cinema.selectedSeats.values()].forEach((s) => cinema.setSeatColor(s, SEAT_COLORS.available));
+  cinema.selectedSeats.clear();
+  cinema.emitSelection();
+}
+
+function clearPreview() {
+  if (!cinema) return;
+  previewSeats.forEach((s) => {
+    if (!cinema.selectedSeats.has(s.id)) cinema.setSeatColor(s, SEAT_COLORS.available);
+  });
+  previewSeats = [];
+}
+
 function setTicketCount(next) {
   ticketCount = Math.min(MAX_TICKETS, Math.max(MIN_TICKETS, next));
   if (elements.ticketCount) elements.ticketCount.textContent = ticketCount;
-  if (cinema && selectedSeats.length > ticketCount) {
-    cinema.trimTo(ticketCount);
+  // Re-grow/shrink the block from the same starting seat when the count changes.
+  if (cinema && anchorSeat) {
+    selectBlockInScene(contiguousBlock(anchorSeat.row, anchorSeat.number, Math.min(ticketCount, MAX_TICKETS)));
   } else {
     renderBooking();
   }
+}
+
+// Replace the engine's single-seat tap + hover with block behaviour. These run on
+// the CinemaScene *instance*, so the engine file stays untouched; its event handlers
+// call `this.pickSeat(...)` / `this.updateHover(...)`, which now point here.
+function installBlockBehaviour() {
+  cinema.pickSeat = function pickSeatBlock(event) {
+    const seat = this.getSeatFromPointer(event);
+    if (!seat) return;
+    if (seat.status === 'occupied') {
+      this.callbacks.onUnavailable?.(seat);
+      return;
+    }
+    // Tapping inside the current group clears it.
+    if (this.selectedSeats.has(seat.id)) {
+      anchorSeat = null;
+      clearSelectionInScene();
+      return;
+    }
+    anchorSeat = seat;
+    selectBlockInScene(contiguousBlock(seat.row, seat.number, Math.min(ticketCount, MAX_TICKETS)));
+  };
+
+  cinema.updateHover = function updateHoverBlock(event) {
+    if (this.isSeatView) return;
+    const seat = this.getSeatFromPointer(event);
+    const nextSeat = seat && seat.status === 'available' ? seat : null;
+    const block = nextSeat
+      ? contiguousBlock(nextSeat.row, nextSeat.number, Math.min(ticketCount, MAX_TICKETS))
+      : [];
+
+    // Restore the previous preview (leave selected seats alone), then paint the new one.
+    previewSeats.forEach((s) => {
+      if (!this.selectedSeats.has(s.id)) this.setSeatColor(s, SEAT_COLORS.available);
+    });
+    previewSeats = [];
+    block.forEach((s) => {
+      if (!this.selectedSeats.has(s.id)) this.setSeatColor(s, SEAT_COLORS.hover);
+      previewSeats.push(s);
+    });
+
+    this.renderer.domElement.style.cursor = seat
+      ? (seat.status === 'occupied' ? 'not-allowed' : 'pointer')
+      : 'grab';
+  };
+
+  // Clear the preview when the pointer leaves the canvas.
+  cinema.renderer.domElement.addEventListener('pointerleave', clearPreview);
 }
 
 function startScene(data) {
@@ -113,14 +233,14 @@ function startScene(data) {
   MAX_TICKETS = data.maxSeats || 5;
   ticketCount = Math.min(ticketCount, MAX_TICKETS);
 
+  // (Re)build the neighbour index for block selection.
+  seatByRowNum = new Map();
+  allSeats.forEach((s) => seatByRowNum.set(s.row + ':' + s.number, s));
+
   cinema = new CinemaScene(elements.scene, allSeats, {
     maxSeats: MAX_TICKETS,
     onSelectionChange: (seats) => {
       selectedSeats = seats;
-      if (seats.length > ticketCount) {
-        ticketCount = Math.min(MAX_TICKETS, seats.length);
-        if (elements.ticketCount) elements.ticketCount.textContent = ticketCount;
-      }
       renderBooking();
     },
     onUnavailable: (seat) => showToast(`Seat ${seat.id} is taken — pick another.`),
@@ -129,6 +249,7 @@ function startScene(data) {
     onContextRestored: () => showToast('The 3D view is ready again.'),
   });
 
+  installBlockBehaviour();
   renderBooking();
 }
 

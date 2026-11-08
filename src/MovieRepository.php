@@ -5,9 +5,18 @@ declare(strict_types=1);
 // All queries use prepared statements (no user input built into SQL text).
 final class MovieRepository
 {
-    private const COLUMNS = 'movie_id,title,genre,description,duration_minutes,cover_image';
+    private const COLUMNS = 'movie_id,title,genre,description,duration_minutes,cover_image,backdrop_image,is_featured';
 
     public function __construct(private PDO $db) {}
+
+    /** The movie that headlines the front-page hero (is_featured = 1), or null if none is marked. */
+    public function findFeatured(): ?Movie
+    {
+        $movies = $this->fetchMovies(
+            'SELECT ' . self::COLUMNS . ' FROM Movie WHERE is_featured = 1 ORDER BY movie_id LIMIT 1'
+        );
+        return $movies[0] ?? null;
+    }
 
     /** @return Movie[] */
     public function findAll(): array
@@ -29,7 +38,7 @@ final class MovieRepository
     public function findAllWithUpcomingShowings(): array
     {
         return $this->fetchMovies(
-            'SELECT m.movie_id,m.title,m.genre,m.description,m.duration_minutes,m.cover_image FROM Movie m
+            'SELECT m.movie_id,m.title,m.genre,m.description,m.duration_minutes,m.cover_image,m.backdrop_image,m.is_featured FROM Movie m
              WHERE EXISTS (SELECT 1 FROM Screening s WHERE s.movie_id=m.movie_id
              AND (s.screening_date > :today
                   OR (s.screening_date = :today_again AND s.screening_time > :now_time)))
@@ -45,7 +54,8 @@ final class MovieRepository
         $stmt->execute($params);
         return array_map(static fn(array $r): Movie => new Movie(
             (int)$r['movie_id'], (string)$r['title'], (string)$r['genre'],
-            (string)$r['description'], (int)$r['duration_minutes'], $r['cover_image']
+            (string)$r['description'], (int)$r['duration_minutes'], $r['cover_image'],
+            $r['backdrop_image'] ?? null, (bool)($r['is_featured'] ?? false)
         ), $stmt->fetchAll());
     }
 }
