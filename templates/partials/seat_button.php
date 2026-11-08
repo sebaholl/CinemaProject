@@ -1,5 +1,5 @@
 <?php
-// One seat in the seating plan. Needs: $seat (array from SampleData::seatMap()).
+// One seat in the seating plan. Needs: $seat (array from vm_seat_rows()).
 // Sold seats render as a non-clickable icon. Free seats are buttons the JS can toggle.
 $type  = $seat['type'];                       // standard | luxury | accessible
 $state = $seat['state'];                       // available | sold

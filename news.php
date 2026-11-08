@@ -1,10 +1,15 @@
 <?php
-// News list page (stub). Will be filled from the database later.
+// News list page. Reads every news item from the database.
 require_once __DIR__ . '/includes/bootstrap.php';
 
 $pageTitle   = 'News';
 $currentPage = 'news';
-$events      = SampleData::events();
+
+$pdo    = Database::getInstance()->getConnection();
+$events = [];
+foreach ((new NewsRepository($pdo))->findAll() as $i => $n) {
+    $events[] = vm_news_card($n, $i === 0);
+}
 
 require __DIR__ . '/templates/layout/header.php';
 ?>

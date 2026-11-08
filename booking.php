@@ -1,7 +1,7 @@
 <?php
-// Booking page: seating plan for one showing.
-// Reached from the showtime buttons, e.g. booking.php?showing_id=100
-// Only prepares data here; the HTML lives in the templates.
+// Booking page: seating plan for one screening.
+// Reached from the showtime buttons, e.g. booking.php?showing_id=1
+// Controller only: reads data through the repositories; the HTML lives in templates.
 require_once __DIR__ . '/includes/bootstrap.php';
 
 // Read and validate the showing id from the URL.
@@ -10,11 +10,12 @@ $showingId = isset($_GET['showing_id']) ? (int) $_GET['showing_id'] : 0;
 // 2D plan by default; ?view=3d switches to the 3D viewer.
 $view = (isset($_GET['view']) && $_GET['view'] === '3d') ? '3d' : '2d';
 
-// TEMPORARY sample data. Later replaced by the Showing / Seat classes reading the DB.
-$showing = SampleData::showingById($showingId);
+$pdo         = Database::getInstance()->getConnection();
+$showingRepo = new ShowingRepository($pdo);
+$screening   = $showingRepo->findById($showingId);
 
 // Unknown showing: show a friendly 404 instead of a broken page.
-if ($showing === null) {
+if ($screening === null) {
     http_response_code(404);
     $pageTitle   = 'Showing not found';
     $currentPage = '';
@@ -33,7 +34,32 @@ if ($showing === null) {
     exit;
 }
 
-$seatRows = SampleData::seatMap($showingId);
+// Movie gives us the runtime + a backdrop image for the mini hero.
+$movie = (new MovieRepository($pdo))->findById($screening->getMovieId());
+
+$showing = [
+    'id'         => $screening->getId(),
+    'title'      => $screening->getMovieTitle(),
+    'duration'   => $movie ? $movie->getDurationMinutes() : 0,
+    'screen'     => $screening->getHallId(),
+    'time'       => substr($screening->getTime(), 0, 5),
+    'format'     => $screening->getFormat(),
+    'date_label' => format_showing_date($screening->getDate()),
+    'backdrop'   => ($movie && $movie->getCoverImage())
+        ? $movie->getCoverImage()
+        : 'https://images.alphacoders.com/141/thumb-1920-1412625.jpg',
+    'price'      => Pricing::STANDARD,
+];
+
+// 3D view is a full-screen takeover with its own <head> (Three.js + importmap),
+// so it does NOT use the normal site header/footer. It loads seats via api/seats.php.
+if ($view === '3d') {
+    require __DIR__ . '/templates/sections/seatmap_3d.php';
+    exit;
+}
+
+// 2D view: seat map straight from the database (which seats are sold for THIS screening).
+$seatRows = vm_seat_rows((new SeatRepository($pdo))->findForScreening($showingId));
 
 $pageTitle   = 'Book · ' . $showing['title'];
 $currentPage = '';   // not a main-nav page, so nothing is highlighted

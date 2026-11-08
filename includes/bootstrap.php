@@ -3,8 +3,9 @@
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/view_models.php';
 
-// Load classes from src/ automatically: new SampleData() loads src/SampleData.php
+// Load classes from src/ automatically: new MovieRepository() loads src/MovieRepository.php
 spl_autoload_register(function (string $class): void {
     $file = __DIR__ . '/../src/' . $class . '.php';
     if (is_file($file)) {
