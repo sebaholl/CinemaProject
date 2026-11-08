@@ -131,7 +131,7 @@ button { color: inherit; }
   left: 50%;
   bottom: 22px;
   transform: translateX(-50%);
-  width: min(1180px, calc(100% - 44px));
+  width: min(900px, calc(100% - 44px));
   max-height: calc(100dvh - 104px);
   display: flex;
   flex-direction: row;
@@ -144,16 +144,16 @@ button { color: inherit; }
 .booking::-webkit-scrollbar { width: 0; }
 
 .bk-card {
-  padding: 22px 24px;
+  padding: 15px 18px;
   border: 1px solid var(--card-border);
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--card-bg);
   box-shadow: 0 24px 70px rgba(0,0,0,.42);
   backdrop-filter: blur(22px);
 }
-.bk-card__title { margin: 0; color: #ececf1; font: 700 20px/1.25 'Manrope', sans-serif; }
-.bk-muted { margin: 0; color: var(--card-muted); font-size: 13px; line-height: 1.45; }
-.bk-divider { height: 1px; margin: 18px 0; border: 0; background: rgba(255,255,255,.08); }
+.bk-card__title { margin: 0; color: #ececf1; font: 700 16px/1.25 'Manrope', sans-serif; }
+.bk-muted { margin: 0; color: var(--card-muted); font-size: 12px; line-height: 1.4; }
+.bk-divider { height: 1px; margin: 12px 0; border: 0; background: rgba(255,255,255,.08); }
 
 .bk-ticket { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .bk-ticket__info { display: flex; flex-direction: column; gap: 5px; }
