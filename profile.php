@@ -110,36 +110,32 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 exit;
             }
         }
+    } elseif (($_POST['action'] ?? null) === 'cancel_booking') {
+        $bookingId = $_POST['booking_id'] ?? null;
+
+        if (!is_string($bookingId) || !ctype_digit($bookingId)) {
+            http_response_code(400);
+            exit('Invalid booking.');
+        }
+
+        $bookRepo = new BookingRepository($pdo);
+        $cancelled = $bookRepo->cancelOwnedBooking(
+            (int) $bookingId,
+            (int) $user['id']
+        );
+
+        if (!$cancelled) {
+            http_response_code(403);
+            exit('This booking cannot be cancelled.');
+        }
+
+        header('Location: ' . url('profile.php'), true, 303);
+        exit;
     } else {
         http_response_code(400);
         $error = 'Unknown profile action.';
     }
 }
-
-if (($_POST['action'] ?? '') === 'cancel_booking') {
-    $bookingId = $_POST['booking_id'] ?? null;
-
-    if (!is_string($bookingId) || !ctype_digit($bookingId)) {
-        http_response_code(400);
-        exit('Invalid booking.');
-    }
-
-    $bookRepo = new BookingRepository($pdo);
-    $cancelled = $bookRepo->cancelOwnedBooking(
-        (int) $bookingId,
-        (int) $user['id']
-    );
-
-    if (!$cancelled) {
-        http_response_code(403);
-        exit('This booking cannot be cancelled.');
-    }
-
-    header('Location: ' . url('profile.php'), true, 303);
-    exit;
-}
-
-
 
 $bookings = $profiles->findBookings((int) $user['id']);
 $pageTitle = 'My profile';
