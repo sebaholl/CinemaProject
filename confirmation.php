@@ -13,7 +13,16 @@ $bookingId = isset($_GET['booking']) ? (int) $_GET['booking'] : 0;
 
 $pdo       = Database::getInstance()->getConnection();
 $bookRepo  = new BookingRepository($pdo);
-$overview  = $bookRepo->findOverview($bookingId);
+$auth = new Auth($pdo);
+$auth->requireLogin();
+$user = $auth->currentUser();
+
+if ($user === null || $user['role'] !== 'customer') {
+    http_response_code(403);
+    exit('Customer account required.');
+}
+
+$overview = $bookRepo->findOwnedOverview($bookingId, (int) $user['id']);
 
 $pageTitle   = 'Booking confirmed';
 $currentPage = '';
