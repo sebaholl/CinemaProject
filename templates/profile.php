@@ -155,8 +155,13 @@
             </p>
 
             <?php if ($booking['invoice_id'] !== null): ?>
-                <p>Invoice #<?= (int) $booking['invoice_id'] ?></p>
-            <?php endif; ?>
+    <p>
+        <a href="<?= e(url('invoice.php?booking=' . (int) $booking['booking_id'])) ?>"
+           class="text-primary hover:underline">
+            Invoice #<?= (int) $booking['invoice_id'] ?>
+        </a>
+    </p>
+<?php endif; ?>
 
             <?php
             $screeningStarts = new DateTimeImmutable(
