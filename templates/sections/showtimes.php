@@ -41,9 +41,8 @@
                     <div class="flex-1 grid grid-cols-7 gap-space-sm">
                         <?php foreach ($days as $i => $day): ?>
                             <div class="flex flex-col gap-space-sm transition-opacity" data-day-col="<?= (int) $i ?>">
-                                <?php if ($row === 0): ?>
-                                    <div class="text-center pb-space-xs border-b border-surface-container-highest/20 font-body-bold text-caption-label text-on-surface"><?= e($day['label']) ?></div>
-                                <?php endif; ?>
+                                <!-- Date header repeated above every movie's showings, not just the first row -->
+                                <div class="text-center pb-space-xs border-b border-surface-container-highest/20 font-body-bold text-caption-label text-on-surface"><?= e($day['label']) ?></div>
                                 <div class="flex flex-col gap-space-sm">
                                     <?php foreach ($movie['days'][$i] as $slot): ?>
                                         <?php include __DIR__ . '/../partials/showtime_slot.php'; ?>

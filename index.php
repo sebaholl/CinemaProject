@@ -18,15 +18,24 @@ foreach ($movieRepo->findAll() as $m) {
     $movieById[$m->getId()] = $m;
 }
 
-// Featured = the movie of the soonest upcoming screening (fallback: first movie).
-$upcoming      = $showingRepo->findUpcoming();
-$featuredMovie = $upcoming ? ($movieById[$upcoming[0]->getMovieId()] ?? null) : null;
+// Featured movie for the hero: the one flagged is_featured in the DB.
+// Fallbacks keep the hero populated if nothing is flagged: soonest upcoming, then first movie.
+$featuredMovie = $movieRepo->findFeatured();
+if ($featuredMovie === null) {
+    $upcoming      = $showingRepo->findUpcoming();
+    $featuredMovie = $upcoming ? ($movieById[$upcoming[0]->getMovieId()] ?? null) : null;
+}
 if ($featuredMovie === null) {
     $featuredMovie = $movieById ? reset($movieById) : null;
 }
 $featured = $featuredMovie
-    ? ['title' => $featuredMovie->getTitle(), 'duration' => $featuredMovie->getDurationMinutes(), 'description' => $featuredMovie->getDescription()]
-    : ['title' => SITE_NAME, 'duration' => 0, 'description' => ''];
+    ? [
+        'title'       => $featuredMovie->getTitle(),
+        'duration'    => $featuredMovie->getDurationMinutes(),
+        'description' => $featuredMovie->getDescription(),
+        'backdrop'    => $featuredMovie->getBackdropImage(),
+      ]
+    : ['title' => SITE_NAME, 'duration' => 0, 'description' => '', 'backdrop' => null];
 
 // Today's showtime chips: only the next few that have not started yet (keeps the hero tidy).
 $nowTime       = gmdate('H:i:s');

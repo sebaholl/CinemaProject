@@ -1,11 +1,15 @@
 <?php
 // Hero: featured movie, today's showtime chips, and the poster row.
 // Needs: $featured, $todayShowings, $nowShowing
+// Background comes from the featured movie's backdrop_image; falls back to a generic image.
+$heroBg = !empty($featured['backdrop'])
+    ? $featured['backdrop']
+    : 'https://images.alphacoders.com/141/thumb-1920-1412625.jpg';
 ?>
 <section class="relative w-full -mt-20 overflow-hidden bg-surface-container-lowest">
     <!-- Background image with dark gradients on top -->
     <div class="absolute inset-0 z-0">
-        <div class="w-full h-full bg-cover bg-center opacity-30 transform scale-105 filter blur-sm" style="background-image: url('https://images.alphacoders.com/141/thumb-1920-1412625.jpg');"></div>
+        <div class="w-full h-full bg-contain bg-no-repeat bg-center md:bg-right opacity-30 filter blur-sm" style="background-image: url('<?= e($heroBg) ?>');"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/80 to-transparent"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-surface-container-lowest via-surface-container-lowest/70 to-transparent"></div>
     </div>
@@ -21,8 +25,6 @@
                         <?= e(format_duration($featured['duration'])) ?>
                     </span>
                 </div>
-
-                <p class="font-body-regular text-body-regular text-on-surface-variant max-w-2xl leading-relaxed"><?= e($featured['description']) ?></p>
 
                 <div class="flex flex-wrap items-center gap-space-md pt-space-xs">
                     <a class="inline-flex items-center justify-center gap-space-xs px-7 py-3 rounded-full bg-primary-container text-on-primary font-body-bold text-caption-label uppercase tracking-wider shadow-lg hover:shadow-[0_4px_24px_rgba(255,81,103,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 font-bold" href="#showtimes-section">

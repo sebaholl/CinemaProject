@@ -26,7 +26,9 @@ CREATE TABLE Movie (
  genre VARCHAR(100) NOT NULL DEFAULT '',
  description TEXT NOT NULL,
  duration_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 0,
- cover_image VARCHAR(500) NULL
+ cover_image VARCHAR(500) NULL,
+ backdrop_image VARCHAR(500) NULL,      -- wide image for the front-page hero background
+ is_featured TINYINT(1) NOT NULL DEFAULT 0  -- 1 = this movie headlines the hero
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE News (
  news_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -191,16 +193,16 @@ INSERT INTO AdminUser(admin_id,name,login,password_hash) VALUES(1,'Demo Admin','
 -- Demo film titles (English). Based on the Esbjerg Broen programme of 4 November 2026,
 -- shown here with English titles. Descriptions are original project metadata, not copied
 -- synopses. Artwork is intentionally absent.
-INSERT INTO Movie(movie_id,title,genre,description,duration_minutes,cover_image) VALUES
-(1,'Avengers: Doomsday','Action','Demo project listing; screening times below are not official.',150,'assets/img/avengers-doomsday.png'),
-(2,'Spider-Man: Brand New Day','Action','Demo project listing; screening times below are not official.',120,'assets/img/spiderman-brand-new-day.png'),
-(4,'Dune: Part Three','Sci-Fi','Demo project listing; screening times below are not official.',155,'assets/img/dune-part-3.png'),
-(5,'Clayface','Horror','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',98,'assets/img/clayface.png'),
-(6,'Pirates of the Caribbean: Dead Man''s Chest','Adventure','Demo project listing; screening times below are not official.',151,'assets/img/pirates-dead-mans-chest.png'),
-(7,'The Forgotten Island','Drama','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',101,'https://placehold.co/400x600/101014/e94560/png?text=The+Forgotten+Island'),
-(8,'The Influencer Project','Satire','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',95,'https://placehold.co/400x600/101014/e94560/png?text=The+Influencer'),
-(9,'Street Fighter','Action','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',130,'assets/img/street-fighter.png'),
-(10,'The Odyssey','Epic','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',166,'https://placehold.co/400x600/101014/e94560/png?text=The+Odyssey');
+INSERT INTO Movie(movie_id,title,genre,description,duration_minutes,cover_image,backdrop_image,is_featured) VALUES
+(1,'Avengers: Doomsday','Action','Demo project listing; screening times below are not official.',150,'assets/img/avengers-doomsday.png',NULL,0),
+(2,'Spider-Man: Brand New Day','Action','Demo project listing; screening times below are not official.',120,'assets/img/spiderman-brand-new-day.png','assets/img/spiderman-brand-new-day-hero.png',1),
+(4,'Dune: Part Three','Sci-Fi','Demo project listing; screening times below are not official.',155,'assets/img/dune-part-3.png',NULL,0),
+(5,'Clayface','Horror','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',98,'assets/img/clayface.png',NULL,0),
+(6,'Pirates of the Caribbean: Dead Man''s Chest','Adventure','Demo project listing; screening times below are not official.',151,'assets/img/pirates-dead-mans-chest.png',NULL,0),
+(7,'The Forgotten Island','Drama','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',101,'https://placehold.co/400x600/101014/e94560/png?text=The+Forgotten+Island',NULL,0),
+(8,'The Influencer Project','Satire','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',95,'https://placehold.co/400x600/101014/e94560/png?text=The+Influencer',NULL,0),
+(9,'Street Fighter','Action','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',130,'assets/img/street-fighter.png',NULL,0),
+(10,'The Odyssey','Epic','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',166,'https://placehold.co/400x600/101014/e94560/png?text=The+Odyssey',NULL,0);
 
 -- 6 auditoriums -----------------------------------------------------------
 INSERT INTO MovieHall(hall_id,name,description) VALUES
