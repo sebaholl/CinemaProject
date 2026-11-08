@@ -41,11 +41,6 @@ $backUrl  = url('booking.php?showing_id=' . (int) $showing['id']); // back to th
              data-seats-url="<?= e($seatsUrl) ?>"
              aria-label="Interactive 3D cinema seating plan"></div>
 
-        <div class="scene-label" aria-hidden="true">
-            <span>Screen</span>
-            <i></i>
-        </div>
-
         <div class="hud-right">
             <div class="controls">
                 <a class="button button--ghost" href="<?= e($backUrl) ?>">Return to 2D view</a>

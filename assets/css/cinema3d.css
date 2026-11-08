@@ -90,23 +90,6 @@ button { color: inherit; }
   background: radial-gradient(circle at 50% 45%, transparent 40%, rgba(3,4,7,0.38) 100%);
 }
 
-.scene-label {
-  position: fixed;
-  z-index: 4;
-  top: 98px;
-  left: 50%;
-  width: 150px;
-  transform: translateX(-50%);
-  text-align: center;
-  color: rgba(255,255,255,0.55);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  pointer-events: none;
-}
-.scene-label i { display: block; height: 1px; margin-top: 8px; background: linear-gradient(90deg, transparent, rgba(242,189,72,.9), transparent); }
-
 .view-hint {
   position: fixed;
   z-index: 5;
@@ -177,16 +160,16 @@ button { color: inherit; }
 .bk-ticket__info .bk-muted { white-space: nowrap; }
 .bk-ticket__name { color: #ececf1; font-size: 18px; font-weight: 600; }
 
-.bk-stepper { display: flex; align-items: center; gap: 14px; }
+.bk-stepper { display: flex; align-items: center; gap: 10px; }
 .bk-step {
-  width: 44px;
-  height: 44px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   border: 1px solid transparent;
-  border-radius: 13px;
+  border-radius: 9px;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 17px;
   line-height: 1;
   transition: background 160ms ease, border-color 160ms ease;
 }
@@ -194,7 +177,7 @@ button { color: inherit; }
 .bk-step--minus:hover { background: rgba(255,255,255,.12); }
 .bk-step--plus { color: #fff; background: var(--rose); }
 .bk-step--plus:hover { background: var(--rose-hover); }
-.bk-step__count { min-width: 20px; text-align: center; color: #ececf1; font-size: 20px; font-weight: 600; }
+.bk-step__count { min-width: 18px; text-align: center; color: #ececf1; font-size: 17px; font-weight: 600; }
 .bk-note { margin-top: 18px; }
 
 .bk-seats__empty { margin: 14px 0 0; color: var(--card-muted); font-size: 14px; font-style: italic; }
@@ -279,7 +262,6 @@ button { color: inherit; }
     white-space: nowrap;
   }
   .legend span { font-size: 9px; }
-  .scene-label { display: none; }
   .scene {
     position: fixed;
     top: calc(12px + env(safe-area-inset-top));

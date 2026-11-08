@@ -188,16 +188,17 @@ INSERT INTO Customer(customer_id,first_name,last_name,email,password_hash) VALUE
 (2,'Bob','Demo','bob@example.test','$2y$10$wXtHIGzmhLYMwbfkdxABnev1fQT8tPQgC2kxJ/nzoYSQCXJby54rK'),
 (3,'Charlie','Demo','charlie@example.test','$2y$10$wXtHIGzmhLYMwbfkdxABnev1fQT8tPQgC2kxJ/nzoYSQCXJby54rK');
 INSERT INTO AdminUser(admin_id,name,login,password_hash) VALUES(1,'Demo Admin','demo-admin','$2y$10$wXtHIGzmhLYMwbfkdxABnev1fQT8tPQgC2kxJ/nzoYSQCXJby54rK');
--- Film titles verified on 2026-11-04 at https://www.nfbio.dk/biografer/esbjerg-broen.
--- Descriptions are original project metadata, not copied synopses. Artwork is intentionally absent.
+-- Demo film titles (English). Based on the Esbjerg Broen programme of 4 November 2026,
+-- shown here with English titles. Descriptions are original project metadata, not copied
+-- synopses. Artwork is intentionally absent.
 INSERT INTO Movie(movie_id,title,genre,description,duration_minutes,cover_image) VALUES
-(1,'Fornuft og følelse','Drama','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',120,'https://placehold.co/400x600/101014/e94560/png?text=Fornuft+og+folelse'),
-(2,'Dobbeltfejl','Comedy','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',105,'https://placehold.co/400x600/101014/e94560/png?text=Dobbeltfejl'),
-(3,'Løvehjerte','Adventure','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',110,'https://placehold.co/400x600/101014/e94560/png?text=Lovehjerte'),
+(1,'Sense and Sensibility','Drama','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',120,'https://placehold.co/400x600/101014/e94560/png?text=Sense+and+Sensibility'),
+(2,'Double Fault','Comedy','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',105,'https://placehold.co/400x600/101014/e94560/png?text=Double+Fault'),
+(3,'Lionheart','Adventure','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',110,'https://placehold.co/400x600/101014/e94560/png?text=Lionheart'),
 (4,'Wildwood','Fantasy','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',128,'https://placehold.co/400x600/101014/e94560/png?text=Wildwood'),
 (5,'Clayface','Horror','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',98,'https://placehold.co/400x600/101014/e94560/png?text=Clayface'),
-(6,'Råplan','Thriller','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',112,'https://placehold.co/400x600/101014/e94560/png?text=Raplan'),
-(7,'Den glemte Ø','Drama','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',101,'https://placehold.co/400x600/101014/e94560/png?text=Den+glemte+O'),
+(6,'Rough Plan','Thriller','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',112,'https://placehold.co/400x600/101014/e94560/png?text=Rough+Plan'),
+(7,'The Forgotten Island','Drama','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',101,'https://placehold.co/400x600/101014/e94560/png?text=The+Forgotten+Island'),
 (8,'The Influencer Project','Satire','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',95,'https://placehold.co/400x600/101014/e94560/png?text=The+Influencer'),
 (9,'Street Fighter','Action','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',130,'https://placehold.co/400x600/101014/e94560/png?text=Street+Fighter'),
 (10,'The Odyssey','Epic','Listed in Esbjerg Broen cinema programme on 4 November 2026. Demo project listing; screening times below are not official.',166,'https://placehold.co/400x600/101014/e94560/png?text=The+Odyssey');
