@@ -1,5 +1,13 @@
 <?php
 // Page layout: top part. Expects $pageTitle and $currentPage to be set by the page.
+
+$navUser = null;
+
+if (!empty($_SESSION['auth'])) {
+    $navAuth = new Auth(Database::getInstance()->getConnection());
+    $navUser = $navAuth->currentUser();
+}
+
 $navItems = [
     'home'    => ['Home',    'index.php'],
     'movies'  => ['Movies',  'movies.php'],
@@ -47,10 +55,29 @@ $navIdle   = 'font-body-regular text-body-regular text-on-surface-variant hover:
             <button aria-label="Search screenings and movies" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">
                 <span class="material-symbols-outlined">search</span>
             </button>
-            <div class="flex items-center gap-space-sm p-space-xs pl-space-sm bg-surface-container-low rounded-full">
-                <a class="hidden md:inline-flex items-center justify-center px-space-md py-space-xs rounded-full bg-primary-container text-on-primary font-body-bold text-caption-label uppercase tracking-wider hover:bg-primary transition-colors"
-                   href="<?= e(url('login.php')) ?>">Log In</a>
-            </div>
+            <div class="flex items-center gap-space-sm">
+    <?php if ($navUser !== null): ?>
+        <?php if ($navUser['role'] === 'customer'): ?>
+            <a href="<?= e(url('profile.php')) ?>"
+               class="px-space-md py-space-xs text-on-surface">
+                My profile
+            </a>
+        <?php endif; ?>
+
+        <form method="post" action="<?= e(url('logout.php')) ?>">
+            <?= csrf_field() ?>
+            <button type="submit"
+                    class="px-space-md py-space-xs rounded-full bg-primary-container text-on-primary">
+                Log out
+            </button>
+        </form>
+    <?php else: ?>
+        <a href="<?= e(url('login.php')) ?>"
+           class="px-space-md py-space-xs rounded-full bg-primary-container text-on-primary">
+            Log in
+        </a>
+    <?php endif; ?>
+</div>
         </div>
     </div>
 </header>

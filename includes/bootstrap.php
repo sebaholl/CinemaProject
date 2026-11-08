@@ -14,6 +14,8 @@ spl_autoload_register(function (string $class): void {
 });
 
 if (session_status() === PHP_SESSION_NONE) {
+
+    session_name('CinemaSession');
     // Reject session IDs that PHP did not create.
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');

@@ -117,6 +117,56 @@ final class BookingRepository
         return $row === false ? null : $row;
     }
 
+    /** Return a booking only when it belongs to this customer. */
+public function findOwnedOverview(int $bookingId, int $customerId): ?array
+{
+    if ($bookingId < 1 || $customerId < 1) {
+        return null;
+    }
+
+    $stmt = $this->db->prepare(
+        'SELECT booking_id, customer_name, movie_title, screening_date,
+                screening_time, hall_name, status, price,
+                invoice_id, invoice_date, invoice_total
+         FROM v_booking_overview
+         WHERE booking_id = :booking_id
+           AND customer_id = :customer_id'
+    );
+    $stmt->execute([
+        ':booking_id' => $bookingId,
+        ':customer_id' => $customerId,
+    ]);
+
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/** Cancel this customer's booking only when the screening is over 2 hours away. */
+public function cancelOwnedBooking(int $bookingId, int $customerId): bool
+{
+    if ($bookingId < 1 || $customerId < 1) {
+        return false;
+    }
+
+    $stmt = $this->db->prepare(
+        "UPDATE Booking b
+         JOIN Screening sc ON sc.screening_id = b.screening_id
+         SET b.status = 'cancelled'
+         WHERE b.booking_id = :booking_id
+           AND b.customer_id = :customer_id
+           AND b.status = 'confirmed'
+           AND TIMESTAMP(sc.screening_date, sc.screening_time)
+               > UTC_TIMESTAMP() + INTERVAL 2 HOUR"
+    );
+
+    $stmt->execute([
+        ':booking_id' => $bookingId,
+        ':customer_id' => $customerId,
+    ]);
+
+    return $stmt->rowCount() === 1;
+}
+
     /** @return string[] Seat labels (e.g. "F3") for a booking, ordered by row then number. */
     public function findSeatLabels(int $bookingId): array
     {
