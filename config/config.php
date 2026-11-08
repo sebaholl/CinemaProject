@@ -10,7 +10,7 @@
 
 $config = [
     // URL path where the project lives. '' if the site is at the domain root.
-    'base_url' => '/CinemaProject',
+    'base_url' => '/DWP/CinemaProject',
     'site_name' => 'Lumen Cinema',
 
     // Database connection (used by src/Database.php from build step 2 onward).
