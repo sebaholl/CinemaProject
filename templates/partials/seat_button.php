@@ -3,12 +3,14 @@
 // Sold seats render as a non-clickable icon. Free seats are buttons the JS can toggle.
 $type  = $seat['type'];                       // standard | luxury | accessible
 $state = $seat['state'];                       // available | sold
-$icon  = $type === 'accessible' ? 'accessible' : 'event_seat';
 $label = 'Row ' . $seat['row'] . ', seat ' . $seat['num'];
+
+// Accessible seats keep the wheelchair glyph; everything else uses the chair SVG.
+// seat_icon() is defined in templates/partials/seat_icon.php.
 ?>
 <?php if ($state === 'sold'): ?>
     <span class="seat seat--sold" title="<?= e($label) ?> — sold" aria-hidden="true">
-        <span class="material-symbols-outlined">event_seat</span>
+        <?= seat_icon($type) ?>
     </span>
 <?php else: ?>
     <button type="button"
@@ -21,6 +23,6 @@ $label = 'Row ' . $seat['row'] . ', seat ' . $seat['num'];
             data-price="<?= (int) $seat['price'] ?>"
             aria-pressed="false"
             aria-label="<?= e($label . ', ' . ucfirst($type) . ', ' . $seat['price'] . ' kr') ?>">
-        <span class="material-symbols-outlined"><?= e($icon) ?></span>
+        <?= seat_icon($type) ?>
     </button>
 <?php endif; ?>
