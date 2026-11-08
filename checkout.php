@@ -41,6 +41,39 @@ if (!csrf_check()) {
     exit;
 }
 
+$auth = new Auth($pdo);
+$user = $auth->currentUser();
+
+if ($user === null) {
+    $returnShowingId = 0;
+
+    if ($step === 'select' &&
+        is_string($_POST['showing_id'] ?? null) &&
+        ctype_digit($_POST['showing_id'])) {
+        $returnShowingId = (int) $_POST['showing_id'];
+    } elseif (isset($_SESSION['checkout']['showing_id'])) {
+        $returnShowingId = (int) $_SESSION['checkout']['showing_id'];
+    }
+
+    $returnTo = $returnShowingId > 0
+        ? url('booking.php?showing_id=' . $returnShowingId)
+        : url('index.php');
+
+    header(
+        'Location: ' . url(
+            'login.php?return=' . rawurlencode($returnTo)
+        ),
+        true,
+        303
+    );
+    exit;
+}
+
+if ($user['role'] !== 'customer') {
+    http_response_code(403);
+    exit('Customer account required to book seats.');
+}
+
 // ---------------------------------------------------------------------------
 // STEP 1 — seats chosen on the booking page. Validate and show the card form.
 // ---------------------------------------------------------------------------
@@ -115,7 +148,9 @@ if (str_ends_with($cardRaw, '0000')) {
 
 // Payment "succeeded" — create the booking (this is the real seat lock).
 try {
-    $booking = $bookRepo->create($showingId, GUEST_CUSTOMER_ID, $allSeats, $seatIds);
+    $booking = $bookRepo->create(
+    $showingId, (int) $user['id'], $allSeats, $seatIds
+);
 } catch (BookingException $e) {
     render_card_form($screening, $allSeats, $seatIds, $e->getMessage());
     exit;
