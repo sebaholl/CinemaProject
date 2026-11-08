@@ -94,6 +94,19 @@ function csrf_check(): bool
         && hash_equals($_SESSION['csrf_token'], $sent);
 }
 
+// --- Current customer ------------------------------------------------------
+// The logged-in customer's id, or null for a guest. Login/registration (build
+// step 4) will set $_SESSION['customer_id']; until then this returns null.
+// This is the single switch for the "max 5 per customer" rule: while it is null
+// the checkout counts 0 existing seats (so the shared guest id can't block
+// everyone), and it becomes a true per-customer cap the moment login populates
+// the session — with no change to the validation code.
+function current_customer_id(): ?int
+{
+    $id = $_SESSION['customer_id'] ?? null;
+    return is_int($id) && $id > 0 ? $id : null;
+}
+
 // Decide how full a showing is. Used to pick the slot colour.
 // Thresholds match the legend: 20-100% ok, 10-20% low, 1-10% critical, 0 sold out.
 // Later this logic moves to the Showing class / the "seats remaining" view.

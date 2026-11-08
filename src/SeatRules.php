@@ -15,9 +15,13 @@ final class SeatRules
      *
      * @param Seat[] $allSeats        Every seat in the screening's hall, with its sold flag.
      * @param int[]  $selectedSeatIds The seat ids the customer wants to book.
+     * @param int    $alreadyBookedByCustomer Seats this customer already holds (confirmed) for
+     *                                this screening. The max-5 rule counts these PLUS the new
+     *                                selection. The controller (checkout.php) passes the real
+     *                                count once a customer is logged in, and 0 for guests.
      * @return string[] One message per broken rule. Empty array means the selection is allowed.
      */
-    public static function validate(array $allSeats, array $selectedSeatIds): array
+    public static function validate(array $allSeats, array $selectedSeatIds, int $alreadyBookedByCustomer = 0): array
     {
         $errors   = [];
         $selected = array_values(array_unique(array_map('intval', $selectedSeatIds)));
@@ -27,12 +31,19 @@ final class SeatRules
             return ['Please select at least one seat.'];
         }
 
-        // Rule 1: at most 5 seats per booking.
-        // NOTE: the assignment says "per customer". Until login exists everyone shares
-        // one guest customer, so we enforce it per booking for now; add a
-        // per-customer-per-screening check once real accounts are in.
-        if (count($selected) > self::MAX_SEATS) {
-            $errors[] = 'You can book at most ' . self::MAX_SEATS . ' seats in one booking.';
+        // Rule 1: at most 5 seats per customer per screening — the customer's seats already
+        // booked for this screening PLUS the new selection. $alreadyBookedByCustomer is threaded
+        // in from the controller; it is the real count when a customer is logged in, and 0 for
+        // guests (until login exists everyone shares one guest customer, so aggregating guest
+        // bookings would wrongly block everyone — see checkout.php and current_customer_id()).
+        if ($alreadyBookedByCustomer + count($selected) > self::MAX_SEATS) {
+            if ($alreadyBookedByCustomer > 0) {
+                $canAdd = max(0, self::MAX_SEATS - $alreadyBookedByCustomer);
+                $errors[] = 'You can book at most ' . self::MAX_SEATS . ' seats per showing. You already have '
+                    . $alreadyBookedByCustomer . ', so you can add at most ' . $canAdd . ' more.';
+            } else {
+                $errors[] = 'You can book at most ' . self::MAX_SEATS . ' seats in one booking.';
+            }
         }
 
         // Index the seats by id so we can validate the posted ids.

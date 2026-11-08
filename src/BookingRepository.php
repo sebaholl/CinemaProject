@@ -103,6 +103,30 @@ final class BookingRepository
         }
     }
 
+    /**
+     * How many seats this customer already holds (in CONFIRMED bookings) for one screening.
+     * Backs the "max 5 seats per customer per showing" rule: SeatRules adds this to the new
+     * selection. Uses idx_booking_customer + uq_screening_seat on the join/filter.
+     */
+    public function countConfirmedSeatsForCustomer(int $screeningId, int $customerId): int
+    {
+        if ($screeningId < 1 || $customerId < 1) { return 0; }
+        $stmt = $this->db->prepare(
+            'SELECT COUNT(*)
+             FROM BookingSeat bs
+             JOIN Booking b ON b.booking_id = bs.booking_id
+             WHERE b.screening_id = :screening_id
+               AND b.customer_id = :customer_id
+               AND b.status = :status'
+        );
+        $stmt->execute([
+            ':screening_id' => $screeningId,
+            ':customer_id'  => $customerId,
+            ':status'       => 'confirmed',
+        ]);
+        return (int) $stmt->fetchColumn();
+    }
+
     /** One booking's summary row from the v_booking_overview view, or null. */
     public function findOverview(int $bookingId): ?array
     {
