@@ -94,9 +94,10 @@ final class Auth
     }
 
     public function isAdmin(): bool
-    {
-        return $this->currentUser()['role'] === 'admin';
-    }
+{
+    $user = $this->currentUser();
+    return $user !== null && $user['role'] === 'admin';
+}
 
     public function requireLogin(): void
     {
