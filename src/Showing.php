@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// One screening, enriched with seat totals from the v_screenings_with_seats_left view.
 final class Showing
 {
     public function __construct(
@@ -15,7 +14,8 @@ final class Showing
         private string $format,
         private int $totalSeats,
         private int $bookedSeats,
-        private int $seatsLeft
+        private int $seatsLeft,
+        private int $priceKr
     ) {}
 
     public function getId(): int { return $this->id; }
@@ -29,4 +29,5 @@ final class Showing
     public function getTotalSeats(): int { return $this->totalSeats; }
     public function getBookedSeats(): int { return $this->bookedSeats; }
     public function getSeatsLeft(): int { return $this->seatsLeft; }
+    public function getPriceKr(): int { return $this->priceKr; }
 }
