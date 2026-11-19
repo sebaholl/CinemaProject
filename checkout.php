@@ -180,7 +180,10 @@ function render_card_form($screening, array $allSeats, array $seatIds, ?string $
     foreach ($seatIds as $id) {
         if (!isset($byId[$id])) { continue; }
         $seat  = $byId[$id];
-        $price = Pricing::priceFor($seat->getSeatType());
+        $price = Pricing::priceFor(
+        $seat->getSeatType(),
+        $screening->getPriceKr()
+         );
         $total += $price;
         $orderSeats[] = ['label' => $seat->getRowLabel() . $seat->getSeatNumber(), 'price' => $price];
     }

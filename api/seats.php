@@ -48,7 +48,7 @@ try {
             'typeRaw' => $typeRaw,
             // Display type for the 3D panel: luxury shows as "Premium", the rest "Standard".
             'type'    => $typeRaw === 'luxury' ? 'Premium' : 'Standard',
-            'price'   => Pricing::priceFor($typeRaw),
+            'price'   => Pricing::priceFor($typeRaw, $screening->getPriceKr())
             'status'  => $seat->isSold() ? 'occupied' : 'available',
         ];
     }

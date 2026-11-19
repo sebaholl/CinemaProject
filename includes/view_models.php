@@ -82,7 +82,7 @@ function vm_week_schedule(array $weekShowings, array $movieById, array $days): a
 
 // Seat map rows for the booking page. Matches templates/sections/seatmap.php.
 // @param Seat[] $seats
-function vm_seat_rows(array $seats): array
+function vm_seat_rows(array $seats, int $standardPrice = Pricing::STANDARD): array
 {
     $rows = [];
     foreach ($seats as $seat) {
@@ -96,7 +96,7 @@ function vm_seat_rows(array $seats): array
             'num'   => $seat->getSeatNumber(),
             'type'  => $seat->getSeatType(),
             'state' => $seat->isSold() ? 'sold' : 'available',
-            'price' => Pricing::priceFor($seat->getSeatType()),
+            'price' => Pricing::priceFor($seat->getSeatType(), $standardPrice),
         ];
     }
     ksort($rows);

@@ -61,7 +61,7 @@ $backUrl  = url('booking.php?showing_id=' . (int) $showing['id']); // back to th
                 <div class="bk-ticket">
                     <div class="bk-ticket__info">
                         <span class="bk-ticket__name">Tickets</span>
-                        <span class="bk-muted"><?= (int) Pricing::STANDARD ?> kr standard incl. <?= (int) Pricing::BOOKING_FEE ?> kr fee</span>
+                        <span class="bk-muted"><?= (int) $showing['price'] ?> kr standard incl. <?= (int) Pricing::BOOKING_FEE ?> kr fee</span>
                     </div>
                     <div class="bk-stepper">
                         <button class="bk-step bk-step--minus" id="ticket-minus" type="button" aria-label="Fewer tickets">−</button>
@@ -69,7 +69,7 @@ $backUrl  = url('booking.php?showing_id=' . (int) $showing['id']); // back to th
                         <button class="bk-step bk-step--plus" id="ticket-plus" type="button" aria-label="More tickets">+</button>
                     </div>
                 </div>
-                <p class="bk-muted bk-note">Up to <?= (int) SeatRules::MAX_SEATS ?> seats per booking. Luxury seats cost <?= (int) Pricing::LUXURY ?> kr.</p>
+                <p class="bk-muted bk-note">Up to <?= (int) SeatRules::MAX_SEATS ?> seats per booking. Luxury seats cost <?= (int) ($showing['price'] + Pricing::LUXURY_EXTRA) ?> kr.</p>
             </article>
 
             <article class="bk-card">

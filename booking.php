@@ -48,7 +48,7 @@ $showing = [
     'backdrop'   => ($movie && $movie->getCoverImage())
         ? $movie->getCoverImage()
         : 'https://images.alphacoders.com/141/thumb-1920-1412625.jpg',
-    'price'      => Pricing::STANDARD,
+    'price' => $screening->getPriceKr(),
 ];
 
 // 3D view is a full-screen takeover with its own <head> (Three.js + importmap),
@@ -59,7 +59,7 @@ if ($view === '3d') {
 }
 
 // 2D view: seat map straight from the database (which seats are sold for THIS screening).
-$seatRows = vm_seat_rows((new SeatRepository($pdo))->findForScreening($showingId));
+$seatRows = vm_seat_rows((new SeatRepository($pdo))->findForScreening($showingId), $screening->getPriceKr())
 
 $pageTitle   = 'Book · ' . $showing['title'];
 $currentPage = '';   // not a main-nav page, so nothing is highlighted
