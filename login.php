@@ -12,7 +12,6 @@ $identifier = '';
 $returnValue = $_POST['return'] ?? $_GET['return'] ?? '';
 $returnTo = url('profile.php');
 
-// Only allow known pages within this website as return destinations.
 if (is_string($returnValue)
     && strlen($returnValue) <= 1024
     && !preg_match('/[\x00-\x1F\x7F\\\\#]/', $returnValue)) {
@@ -22,6 +21,7 @@ if (is_string($returnValue)
         url('profile.php'),
         url('invoice.php'),
         url('booking.php'),
+        url('admin/index.php'),
     ], true)) {
         $returnTo = $returnValue;
     }
@@ -42,10 +42,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         if ($auth->login($identifier, $password)) {
             $user = $auth->currentUser();
 
-            // The admin dashboard is not built yet.
-            $destination = $user['role'] === 'admin'
-                ? url('index.php')
-                : $returnTo;
+            if ($user['role'] === 'admin') {
+                $destination = url('admin/index.php');
+            } elseif (
+                explode('?', $returnTo, 2)[0] === url('admin/index.php')
+            ) {
+                $destination = url('profile.php');
+            } else {
+                $destination = $returnTo;
+            }
 
             header('Location: ' . $destination, true, 303);
             exit;
