@@ -27,6 +27,8 @@ CREATE TABLE Movie (
  genre VARCHAR(100) NOT NULL DEFAULT '',
  description TEXT NOT NULL,
  duration_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+ age_rating VARCHAR(20) NOT NULL DEFAULT 'Not rated',
+ release_date DATE NULL,
  cover_image VARCHAR(500) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE News (
