@@ -38,6 +38,7 @@ CREATE TABLE News (
  description TEXT NOT NULL,
  publication_date DATE NOT NULL,
  image VARCHAR(500) NULL
+ admin_id INT UNSIGNED NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE TABLE CompanyInfo (
  company_info_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
