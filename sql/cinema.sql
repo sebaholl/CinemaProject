@@ -72,6 +72,7 @@ CREATE TABLE Screening (
  screening_date DATE NOT NULL,
  screening_time TIME NOT NULL,
  format VARCHAR(60) NOT NULL DEFAULT '2D, Eng subs',
+ price_kr SMALLINT UNSIGNED NOT NULL DEFAULT 150,
  UNIQUE KEY uq_hall_screening_start (hall_id,screening_date,screening_time),
  CONSTRAINT fk_screening_movie FOREIGN KEY(movie_id) REFERENCES Movie(movie_id) ON DELETE RESTRICT,
  CONSTRAINT fk_screening_hall FOREIGN KEY(hall_id) REFERENCES MovieHall(hall_id) ON DELETE RESTRICT
