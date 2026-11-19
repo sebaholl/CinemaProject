@@ -13,6 +13,34 @@ function url(string $path = ''): string
     return BASE_URL . '/' . ltrim($path, '/');
 }
 
+// One section of the config array, e.g. config('mail') or config('db').
+// Pages get their settings from here instead of re-requiring config.php.
+function config(string $section): array
+{
+    $all = $GLOBALS['app_config'] ?? [];
+    $value = $all[$section] ?? [];
+    return is_array($value) ? $value : [];
+}
+
+// A single config value, e.g. config_value('ticket_secret').
+function config_value(string $key, string $default = ''): string
+{
+    $all = $GLOBALS['app_config'] ?? [];
+    return isset($all[$key]) && is_scalar($all[$key]) ? (string) $all[$key] : $default;
+}
+
+// Absolute link, e.g. 'http://localhost/CinemaProject/invoice.php?booking=7'.
+// Emails are opened outside the browser, so a path-only link like url() would
+// not resolve there. Remote addresses (http://, https://) are passed straight
+// through, so a poster already stored as a full URL still works.
+function url_abs(string $path = ''): string
+{
+    if (preg_match('#^https?://#i', $path) === 1) {
+        return $path;
+    }
+    return rtrim(SITE_URL, '/') . url($path);
+}
+
 // Build a link to a file in assets/, e.g. asset('css/site.css')
 // Appends the file's last-modified time (?v=...) so browsers always fetch the
 // newest version after we edit a stylesheet or script, instead of a stale cache.

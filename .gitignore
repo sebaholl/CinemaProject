@@ -1,0 +1,14 @@
+# Machine-specific settings and secrets (API tokens, passwords, local URLs).
+# Copy config/local.example.php to config/local.php and keep yours out of git.
+config/local.php
+
+# Emails written by the 'file' mail driver. They contain customer names and
+# addresses, so they are never committed.
+storage/mail/*.eml
+
+# macOS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

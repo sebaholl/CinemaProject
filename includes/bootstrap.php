@@ -1,7 +1,11 @@
 <?php
 // Loaded at the top of every page: config, helpers, class autoloader, session.
 
-require_once __DIR__ . '/../config/config.php';
+// Keep the array config.php returns: the config() helper below serves it to the
+// pages. Plain require (not require_once) because Database.php includes the same
+// file again to build the PDO connection, and config.php is written to be safe
+// to include twice.
+$GLOBALS['app_config'] = require __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/view_models.php';
 

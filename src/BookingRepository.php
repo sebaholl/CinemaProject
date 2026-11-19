@@ -191,6 +191,91 @@ public function cancelOwnedBooking(int $bookingId, int $customerId): bool
     return $stmt->rowCount() === 1;
 }
 
+    /**
+     * Everything needed to print this customer's ticket/receipt, in two queries.
+     *
+     * Reads v_booking_overview (same ownership check as findOwnedOverview - a
+     * customer can only ever pull up their own booking), then the seat rows, and
+     * prices each seat with the same Pricing rules the checkout charged with.
+     * The ticket code is derived from the booking id, not stored.
+     */
+    public function findTicket(int $bookingId, int $customerId, string $ticketSecret): ?Ticket
+    {
+        if ($bookingId < 1 || $customerId < 1) {
+            return null;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT booking_id, customer_name, email, movie_title, cover_image,
+                    screening_date, screening_time, format, hall_name,
+                    status, price, booking_date, invoice_id, invoice_total
+             FROM v_booking_overview
+             WHERE booking_id = :booking_id
+               AND customer_id = :customer_id'
+        );
+        $stmt->execute([
+            ':booking_id'  => $bookingId,
+            ':customer_id' => $customerId,
+        ]);
+
+        $row = $stmt->fetch();
+        if ($row === false) {
+            return null;
+        }
+
+        $seats = $this->findSeatDetails($bookingId);
+
+        // The invoice total is what was actually charged; fall back to the
+        // booking price if an invoice row is somehow missing.
+        $total = (int) round((float) ($row['invoice_total'] ?? $row['price']));
+
+        return new Ticket(
+            (int) $row['booking_id'],
+            $row['invoice_id'] !== null ? (int) $row['invoice_id'] : null,
+            TicketCode::forBooking((int) $row['booking_id'], $ticketSecret),
+            (string) $row['customer_name'],
+            (string) $row['email'],
+            (string) $row['movie_title'],
+            $row['cover_image'] !== null ? (string) $row['cover_image'] : null,
+            (string) $row['hall_name'],
+            (string) $row['screening_date'],
+            (string) $row['screening_time'],
+            (string) $row['format'],
+            $seats,
+            $total,
+            (string) $row['booking_date'],
+            (string) $row['status'],
+        );
+    }
+
+    /**
+     * One row per booked seat, with the price that seat type costs.
+     * Same query as findSeatLabels() plus the seat type, so the receipt can list
+     * "F3 standard 150 kr" per line instead of just a total.
+     *
+     * @return array<int,array{label:string,type:string,price:int}>
+     */
+    public function findSeatDetails(int $bookingId): array
+    {
+        if ($bookingId < 1) { return []; }
+        $stmt = $this->db->prepare(
+            'SELECT s.row_label, s.seat_number, s.seat_type
+             FROM BookingSeat bs JOIN Seat s ON s.seat_id = bs.seat_id
+             WHERE bs.booking_id = :id
+             ORDER BY s.row_label, s.seat_number'
+        );
+        $stmt->execute([':id' => $bookingId]);
+
+        return array_map(
+            static fn(array $r): array => [
+                'label' => $r['row_label'] . $r['seat_number'],
+                'type'  => (string) $r['seat_type'],
+                'price' => Pricing::priceFor((string) $r['seat_type']),
+            ],
+            $stmt->fetchAll()
+        );
+    }
+
     /** @return string[] Seat labels (e.g. "F3") for a booking, ordered by row then number. */
     public function findSeatLabels(int $bookingId): array
     {

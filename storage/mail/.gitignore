@@ -1,0 +1,3 @@
+# Spooled emails from the 'file' mail driver. They contain real customer names
+# and addresses, so they are never committed. The folder itself is kept.
+*.eml

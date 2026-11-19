@@ -167,6 +167,28 @@ try {
     exit;
 }
 
+// Email the customer their ticket. This happens AFTER the booking is committed and
+// must never be allowed to undo it: the seats are paid for and locked, so a mail
+// server having a bad day is not a reason to fail the purchase. Anything that goes
+// wrong is logged and the customer still gets the confirmation page, which shows
+// the same ticket.
+$_SESSION['ticket_mail'] = ['sent' => false, 'to' => ''];
+
+try {
+    $ticket = $bookRepo->findTicket(
+        $booking->getId(),
+        (int) $user['id'],
+        config_value('ticket_secret')
+    );
+
+    if ($ticket !== null) {
+        $sent = (new TicketMailer(new Mailer(config('mail'))))->sendConfirmation($ticket);
+        $_SESSION['ticket_mail'] = ['sent' => $sent, 'to' => $ticket->getCustomerEmail()];
+    }
+} catch (Throwable $e) {
+    error_log('Ticket email failed for booking ' . $booking->getId() . ': ' . $e->getMessage());
+}
+
 // Done. Clear the pending selection and redirect (Post/Redirect/Get) so a refresh
 // of the confirmation page cannot create a second booking.
 unset($_SESSION['checkout']);

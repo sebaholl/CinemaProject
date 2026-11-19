@@ -126,9 +126,13 @@ FROM Screening sc JOIN Movie m ON m.movie_id=sc.movie_id
 JOIN MovieHall h ON h.hall_id=sc.hall_id
 LEFT JOIN (SELECT hall_id,COUNT(*) AS total_seats FROM Seat GROUP BY hall_id) cap ON cap.hall_id=sc.hall_id
 LEFT JOIN (SELECT screening_id,COUNT(*) AS booked_seats FROM BookingSeat GROUP BY screening_id) taken ON taken.screening_id=sc.screening_id;
+-- Used by: profile.php (my bookings), invoice.php, confirmation.php and the
+-- ticket confirmation email (BookingRepository::findTicket / findOwnedOverview).
+-- movie_id, cover_image and format are here for the ticket/receipt layout.
 CREATE VIEW v_booking_overview AS
 SELECT b.booking_id,b.customer_id,CONCAT(c.first_name,' ',c.last_name) AS customer_name,
- c.email,b.screening_id,m.title AS movie_title,sc.screening_date,sc.screening_time,
+ c.email,b.screening_id,m.movie_id,m.title AS movie_title,m.cover_image,
+ sc.screening_date,sc.screening_time,sc.format,
  h.name AS hall_name,b.status,b.booking_date,b.price,
  COALESCE(active.active_seats,0) AS active_seats,
  i.invoice_id,i.invoice_date,i.total AS invoice_total
